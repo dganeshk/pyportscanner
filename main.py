@@ -1,4 +1,5 @@
 import sys
+import time
 from threaded_scanner import start_threaded_scan
 
 def get_target():
@@ -25,6 +26,14 @@ def get_port_range():
         except ValueError:
             print("Invalid format. Please enter the range like '1-1024'.")
 
+def get_protocol():
+    """Prompts the user to choose a protocol for scanning."""
+    while True:
+        protocol = input("Enter the protocol to scan (tcp or udp): ").lower()
+        if protocol in ['tcp', 'udp']:
+            return protocol
+        print("Invalid protocol. Please enter 'tcp' or 'udp'.")
+
 def main():
     """Main function to run the port scanner."""
     print("-" * 50)
@@ -33,11 +42,14 @@ def main():
 
     target_ip = get_target()
     start_port, end_port = get_port_range()
+    protocol = get_protocol()
 
-    print(f"\nScanning ports on {target_ip} from {start_port} to {end_port}...")
-
-    start_threaded_scan(target_ip, start_port, end_port)
-    print("\nScan completed.")
+    print(f"\nScanning {protocol.upper()} ports on {target_ip} from {start_port} to {end_port}...")
+    start_time = time.time()
+    start_threaded_scan(target_ip, start_port, end_port, protocol)
+    end_time = time.time()
+    total_time = end_time - start_time
+    print(f"\nScan completed in {total_time:.2f} seconds.")
 
 if __name__ == "__main__":
     main()
