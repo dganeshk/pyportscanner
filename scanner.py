@@ -4,6 +4,7 @@ import sys
 def scan_port(target_ip, port, protocol='tcp'):
     """
     Attempts to connect to a specific port on the target IP.
+    Returns the connect_ex error code for TCP, a boolean for UDP.
 
     Args:
         target_ip (str): The IP address or hostname to scan.
@@ -15,24 +16,30 @@ def scan_port(target_ip, port, protocol='tcp'):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(1)
             result = s.connect_ex((target_ip, port))
-            if result == 0:
-                print(f"TCP Port {port} is open")
             s.close()
+            return result
+
         elif protocol.lower() == 'udp':
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.settimeout(2)
+            s.settimeout(1)
             try:
                 s.sendto(b'ping', (target_ip, port))
                 s.recvfrom(1024)
+                s.close()
+                return False
             except socket.timeout:
-                print(f"UDP Port {port} is open or filtered")
-            s.close()
+                s.close()
+                return True
+            except ConnectionResetError:
+                s.close()
+                return False
         else:
             print(f"Invalid protocol: {protocol}. Please choose 'tcp' or 'udp'.")
+            return -1
 
     except socket.gaierror:
         print(f"Hostname could not be resolved.")
-        sys.exit() 
+        sys.exit()
     except socket.error:
         print(f"Could not connect to the server.")
         sys.exit()
