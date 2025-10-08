@@ -1,6 +1,6 @@
 import sys
 import time
-from threaded_scanner import start_threaded_scan
+from threadpool import start_threaded_scan
 
 def get_target():
     """Prompts the user for the target IP address."""

@@ -129,6 +129,41 @@ class TestPortScanner(unittest.TestCase):
         expected_ports = set(range(start_port, end_port + 1))
         self.assertEqual(ports_scanned, expected_ports)
 
+    @patch('finder.scan_port')
+    def test_find_first_open_port(self, mock_scan_port):
+        """
+        Tests that find_first_open_port correctly finds the first open port
+        and stops scanning.
+        """
+        # Scenario 1: Open port is found
+        # The mock will return False for the first 4 ports, and True for the 5th.
+        mock_scan_port.side_effect = [False, False, False, False, True]
+        
+        target = '127.0.0.1'
+        start_port = 1
+        end_port = 10
+        
+        # We expect the function to return the 5th port in the range (which is port 5)
+        # and to stop after finding it.
+        result = find_first_open_port(target, start_port, end_port, 'tcp')
+        
+        self.assertEqual(result, 5)
+        # Assert that scan_port was called exactly 5 times (for ports 1 through 5)
+        self.assertEqual(mock_scan_port.call_count, 5)
+
+        # Reset the mock for the next scenario
+        mock_scan_port.reset_mock()
+
+        # Scenario 2: No open port is found
+        # The mock will always return False.
+        mock_scan_port.side_effect = [False] * 10
+        
+        result = find_first_open_port(target, start_port, end_port, 'tcp')
+        
+        self.assertIsNone(result)
+        # Assert that scan_port was called for all 10 ports in the range
+        self.assertEqual(mock_scan_port.call_count, 10)
+
 
 if __name__ == '__main__':
     unittest.main()
