@@ -20,7 +20,7 @@ def scan_port(target_ip, port, protocol='tcp'):
             s.close()
         elif protocol.lower() == 'udp':
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.settimeout(2)
+            s.settimeout(5)
             try:
                 s.sendto(b'ping', (target_ip, port))
                 s.recvfrom(1024)
